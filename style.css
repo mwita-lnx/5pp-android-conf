@@ -1023,17 +1023,24 @@ p {
   min-height: 18rem;
   max-height: 24rem;
   width: 100%;
+  max-width: 100%;
   background: #ffffff;
   padding: 20px;
   overflow-y: auto;
+  overflow-x: auto;
   font-family: "Space Mono", monospace;
   font-size: 0.875rem;
   line-height: 1.6;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .body pre {
   margin: 0;
-  text-wrap: wrap;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   color: #000000;
+  max-width: 100%;
 }
 .body .pulse {
   -webkit-animation: pulse 1s ease-in-out infinite;

@@ -1,0 +1,15 @@
+{
+  "name": "Default Disable Apps",
+  "description": "Default list of apps to disable on Android devices",
+  "apps": [
+    "com.facebook.katana",
+    "com.facebook.orca",
+    "com.instagram.android",
+    "com.twitter.android",
+    "com.snapchat.android",
+    "com.zhiliaoapp.musically",
+    "com.google.android.youtube",
+    "com.google.android.apps.photos",
+    "com.android.chrome"
+  ]
+}

@@ -5,7 +5,7 @@
 	<meta charset="UTF-8">
 	<title>5PP</title>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
-	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="../style.css">
 
 
 </head>
@@ -33,9 +33,9 @@
 						<i class="ph-file-text"></i>
 						<span>Create Contacts</span>
 					</a>
-					<a href="#" id="openJsonDisable">
+					<a href="manage-apps.html">
 						<i class="ph-globe" ></i>
-						<span>Manage Disable</span>
+						<span>Manage Apps</span>
 					</a>
 					<a href="#">
 						<i class="ph-clipboard-text"></i>
@@ -166,33 +166,17 @@
 		</div>
 	</div>
 
-	<div id="jsonModal" class="dark-theme-modal">
-		<div class="dark-theme-modal-content">
-		  <span class="dark-theme-close" id="closeModalBtn">&times;</span>
-		  <h2 class="dark-theme-heading">Edit JSON</h2>
-		  <div class="dark-theme-form-group">
-			<label for="key">Key:</label>
-			<input type="text" id="key" class="dark-theme-input" placeholder="Enter key">
-		  </div>
-		  <div class="dark-theme-form-group">
-			<label for="value">Value:</label>
-			<input type="text" id="value" class="dark-theme-input" placeholder="Enter value">
-		  </div>
-		  <button onclick="addKeyValue()" class="dark-theme-button">Add Key-Value</button>
-		  <button onclick="clearJson()" class="dark-theme-button">Clear JSON</button>
-		</div>
-
 	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 
-	<script src="src/libs/jquery-3.6.0.min.js"></script>
+	<script src="../src/libs/jquery-3.6.0.min.js"></script>
 
 	<script src='https://unpkg.com/phosphor-icons'></script>
-	<script src="script.js"></script>
-	<script src="renderer.js"></script>
-	<script src="src/libs/checklist.js"></script>
-	<script src="src/libs/installApks.js"></script>
-	<script src="src/libs/disableApps.js"></script>
-	<script src="src/libs/contacts.js"></script>
+	<script src="../script.js"></script>
+	<script src="../renderer.js"></script>
+	<script src="../src/libs/checklist.js"></script>
+	<script src="../src/libs/installApks.js"></script>
+	<script src="../src/libs/disableApps.js"></script>
+	<script src="../src/libs/contacts.js"></script>
 
 <script>if (window.module) module = window.module;</script>
 

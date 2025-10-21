@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Manage Apps - 5PP</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+	<link rel="stylesheet" href="../style.css">
+	<style>
+		.filter-tabs {
+			display: flex;
+			gap: 1rem;
+			margin-bottom: 1.5rem;
+			border-bottom: 2px solid #011e41;
+		}
+
+		.filter-tab {
+			padding: 0.75rem 1.5rem;
+			background: transparent;
+			border: none;
+			border-bottom: 3px solid transparent;
+			color: #011e41;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all var(--transition-fast);
+			margin-bottom: -2px;
+		}
+
+		.filter-tab:hover {
+			background: rgba(1, 30, 65, 0.05);
+		}
+
+		.filter-tab.active {
+			border-bottom-color: #ee2435;
+			color: #000000;
+		}
+
+		.app-list-container {
+			max-height: 500px;
+			overflow-y: auto;
+			border: 2px solid #011e41;
+			border-radius: 8px;
+			padding: 1rem;
+			background: #ffffff;
+		}
+
+		.app-list-container::-webkit-scrollbar {
+			width: 8px;
+		}
+
+		.app-list-container::-webkit-scrollbar-thumb {
+			background-color: #011e41;
+			border-radius: 10px;
+		}
+
+		.app-list-container::-webkit-scrollbar-thumb:hover {
+			background-color: #ee2435;
+		}
+
+		.app-list-container::-webkit-scrollbar-track {
+			background-color: rgba(1, 30, 65, 0.1);
+		}
+
+		.app-list {
+			margin: 0;
+		}
+
+		.app-item {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0.5rem 0.75rem;
+			margin-bottom: 0.25rem;
+			background: #ffffff;
+			border: 1px solid #011e41;
+			border-radius: 6px;
+			transition: all var(--transition-fast);
+		}
+
+		.app-item:hover {
+			box-shadow: 0 2px 8px rgba(1, 30, 65, 0.15);
+			transform: translateX(2px);
+		}
+
+		.app-info {
+			flex: 1;
+			min-width: 0;
+		}
+
+		.app-name {
+			font-weight: 700;
+			font-size: 0.875rem;
+			color: #000000;
+			margin-bottom: 0.125rem;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.app-package {
+			font-size: 0.75rem;
+			color: #011e41;
+			font-family: 'Space Mono', monospace;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.toggle-switch {
+			position: relative;
+			width: 50px;
+			height: 24px;
+			margin-left: 0.5rem;
+			flex-shrink: 0;
+		}
+
+		.toggle-switch input {
+			opacity: 0;
+			width: 0;
+			height: 0;
+		}
+
+		.slider {
+			position: absolute;
+			cursor: pointer;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #011e41;
+			transition: 0.4s;
+			border-radius: 30px;
+		}
+
+		.slider:before {
+			position: absolute;
+			content: "";
+			height: 18px;
+			width: 18px;
+			left: 3px;
+			bottom: 3px;
+			background-color: white;
+			transition: 0.4s;
+			border-radius: 50%;
+		}
+
+		input:checked + .slider {
+			background-color: #ee2435;
+		}
+
+		input:checked + .slider:before {
+			transform: translateX(26px);
+		}
+
+		.status-badge {
+			display: none;
+		}
+
+		.status-enabled {
+			background-color: #011e41;
+			color: #ffffff;
+		}
+
+		.status-disabled {
+			background-color: #ee2435;
+			color: #ffffff;
+		}
+
+		.search-box {
+			width: 100%;
+			padding: 1rem 1.5rem;
+			border: 2px solid #011e41;
+			border-radius: 8px;
+			font-size: 1rem;
+			margin-bottom: 1.5rem;
+			font-family: 'Inter', sans-serif;
+		}
+
+		.search-box:focus {
+			outline: none;
+			border-color: #ee2435;
+		}
+
+		.action-buttons {
+			display: flex;
+			gap: 1rem;
+			margin-top: 2rem;
+		}
+
+		.templates-section {
+			margin-top: 2rem;
+			padding: 1.5rem;
+			border: 2px solid #011e41;
+			border-radius: 8px;
+			background: #ffffff;
+		}
+
+		.templates-section h3 {
+			margin-bottom: 1rem;
+			color: #011e41;
+			font-size: 1.125rem;
+			font-weight: 700;
+		}
+
+		.template-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.75rem;
+			margin-bottom: 1rem;
+		}
+
+		.template-item {
+			padding: 0.5rem 1rem;
+			background: #011e41;
+			color: #ffffff;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all var(--transition-fast);
+			font-size: 0.875rem;
+			border: 2px solid #011e41;
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			position: relative;
+		}
+
+		.template-item:hover {
+			background: #ffffff;
+			color: #011e41;
+		}
+
+		.template-item.active {
+			background: #ee2435;
+			border-color: #ee2435;
+		}
+
+		.template-delete-btn {
+			background: transparent;
+			border: none;
+			color: inherit;
+			cursor: pointer;
+			padding: 0.25rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			transition: all var(--transition-fast);
+			margin-left: 0.5rem;
+		}
+
+		.template-delete-btn:hover {
+			background: #ee2435;
+			color: #ffffff;
+		}
+
+		.template-actions {
+			display: flex;
+			gap: 0.5rem;
+			margin-top: 1rem;
+		}
+
+		/* Template Builder Modal */
+		.template-builder-modal {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			backdrop-filter: blur(4px);
+		}
+
+		.template-builder-content {
+			position: relative;
+			margin: 2% auto;
+			background-color: #ffffff;
+			border-radius: 12px;
+			padding: 2rem;
+			width: 90%;
+			max-width: 800px;
+			max-height: 90vh;
+			overflow-y: auto;
+			border: 2px solid #011e41;
+		}
+
+		.template-builder-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 1.5rem;
+			padding-bottom: 1rem;
+			border-bottom: 2px solid #011e41;
+		}
+
+		.template-builder-header h2 {
+			color: #011e41;
+			font-size: 1.5rem;
+			font-weight: 700;
+		}
+
+		.close-modal {
+			background: transparent;
+			border: none;
+			font-size: 2rem;
+			color: #011e41;
+			cursor: pointer;
+			padding: 0;
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 50%;
+			transition: all var(--transition-fast);
+		}
+
+		.close-modal:hover {
+			background: #ee2435;
+			color: #ffffff;
+			transform: rotate(90deg);
+		}
+
+		.template-form {
+			margin-bottom: 1.5rem;
+		}
+
+		.template-form input {
+			width: 100%;
+			padding: 0.75rem;
+			border: 2px solid #011e41;
+			border-radius: 6px;
+			font-size: 1rem;
+			margin-bottom: 1rem;
+			font-family: 'Inter', sans-serif;
+		}
+
+		.template-form input:focus {
+			outline: none;
+			border-color: #ee2435;
+		}
+
+		.template-form textarea {
+			width: 100%;
+			padding: 0.75rem;
+			border: 2px solid #011e41;
+			border-radius: 6px;
+			font-size: 0.875rem;
+			font-family: 'Inter', sans-serif;
+			resize: vertical;
+			min-height: 60px;
+		}
+
+		.template-form textarea:focus {
+			outline: none;
+			border-color: #ee2435;
+		}
+
+		.app-selector-container {
+			max-height: 400px;
+			overflow-y: auto;
+			border: 2px solid #011e41;
+			border-radius: 8px;
+			padding: 1rem;
+			margin-top: 1rem;
+		}
+
+		.app-selector-item {
+			display: flex;
+			align-items: center;
+			padding: 0.5rem;
+			margin-bottom: 0.25rem;
+			border-radius: 6px;
+			cursor: pointer;
+			transition: all var(--transition-fast);
+		}
+
+		.app-selector-item:hover {
+			background: rgba(1, 30, 65, 0.05);
+		}
+
+		.app-selector-item input[type="checkbox"] {
+			width: 20px;
+			height: 20px;
+			margin-right: 1rem;
+			cursor: pointer;
+			accent-color: #011e41;
+		}
+
+		.app-selector-info {
+			flex: 1;
+		}
+
+		.modal-actions {
+			display: flex;
+			gap: 1rem;
+			margin-top: 1.5rem;
+			padding-top: 1.5rem;
+			border-top: 2px solid #011e41;
+		}
+
+		.select-all-btn {
+			background: transparent;
+			color: #011e41;
+			border: 2px solid #011e41;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 0.875rem;
+			font-weight: 600;
+			transition: all var(--transition-fast);
+		}
+
+		.select-all-btn:hover {
+			background: #011e41;
+			color: #ffffff;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="app">
+		<div class="app-body">
+			<div class="app-body-navigation">
+				<nav class="navigation">
+					<a href="index.html">
+						<i class="ph-arrow-left"></i>
+						<span>Back to Dashboard</span>
+					</a>
+					<a href="#" class="active">
+						<i class="ph-globe"></i>
+						<span>Manage Apps</span>
+					</a>
+				</nav>
+			</div>
+
+			<div class="app-body-main-content">
+				<section class="service-section">
+					<h2>Manage Apps</h2>
+					<p style="margin-bottom: 1.5rem; text-align: left; color: #011e41;">
+						Toggle apps to disable or enable them on Android devices
+					</p>
+
+					<input type="text" id="searchBox" class="search-box" placeholder="Search apps by name or package...">
+
+					<div class="filter-tabs">
+						<button class="filter-tab active" data-filter="all">All Apps</button>
+						<button class="filter-tab" data-filter="enabled">Enabled</button>
+						<button class="filter-tab" data-filter="disabled">Disabled</button>
+					</div>
+
+					<div class="app-list-container">
+						<div class="app-list" id="appList">
+							<!-- Apps will be dynamically loaded here -->
+						</div>
+					</div>
+
+					<div class="templates-section">
+						<h3>Disable Templates</h3>
+						<p style="font-size: 0.875rem; color: #011e41; margin-bottom: 1rem;">
+							Click a template to apply it, or save your current selection as a new template
+						</p>
+						<div class="template-list" id="templateList">
+							<!-- Templates will be loaded here -->
+						</div>
+						<div class="template-actions">
+							<button id="createCustomTemplate" class="flat-button">Create Custom Template</button>
+							<button id="saveAsTemplate" class="flat-button">Save Current Selection</button>
+							<button id="updateTemplate" class="flat-button" style="display: none;">Update Active Template</button>
+						</div>
+						<div class="template-actions" style="margin-top: 0.5rem;">
+							<button id="importFromCsv" class="flat-button" style="background: transparent; color: #011e41; border: 2px solid #011e41;">Import from CSV</button>
+							<button id="exportToCsv" class="flat-button" style="background: transparent; color: #011e41; border: 2px solid #011e41;">Export to CSV</button>
+						</div>
+					</div>
+
+					<div class="action-buttons">
+						<button id="applyChanges" class="flat-button">Apply Changes to Devices</button>
+						<button id="refreshList" class="flat-button">Refresh App List</button>
+					</div>
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<!-- Template Builder Modal -->
+	<div id="templateBuilderModal" class="template-builder-modal">
+		<div class="template-builder-content">
+			<div class="template-builder-header">
+				<h2>Create Custom Template</h2>
+				<button class="close-modal" id="closeTemplateBuilder">&times;</button>
+			</div>
+
+			<div class="template-form">
+				<input type="text" id="customTemplateName" placeholder="Template Name *" required>
+				<textarea id="customTemplateDesc" placeholder="Description (optional)"></textarea>
+			</div>
+
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+				<h3 style="color: #011e41; font-size: 1.125rem; font-weight: 700;">Select Apps to Disable</h3>
+				<div>
+					<button class="select-all-btn" id="selectAllApps">Select All</button>
+					<button class="select-all-btn" id="deselectAllApps" style="margin-left: 0.5rem;">Deselect All</button>
+				</div>
+			</div>
+
+			<input type="text" id="modalSearchBox" class="search-box" placeholder="Search apps..." style="margin-bottom: 1rem;">
+
+			<div class="app-selector-container" id="appSelectorContainer">
+				<!-- Apps will be loaded here -->
+			</div>
+
+			<div class="modal-actions">
+				<button id="saveCustomTemplate" class="flat-button">Save Template</button>
+				<button id="cancelTemplateBuilder" class="flat-button" style="background: transparent; color: #011e41;">Cancel</button>
+			</div>
+		</div>
+	</div>
+
+	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+	<script src="../src/libs/jquery-3.6.0.min.js"></script>
+	<script src='https://unpkg.com/phosphor-icons'></script>
+	<script src="../script.js"></script>
+
+	<script>
+		const { ipcRenderer } = require('electron');
+
+		let appStates = {};
+		let allApps = [];
+		let templates = [];
+		let activeTemplate = null;
+
+		// Load apps from connected device
+		async function loadAppsFromDevice() {
+			try {
+				const appList = document.getElementById('appList');
+				appList.innerHTML = '<p style="text-align: center; padding: 2rem;">Loading apps from device...</p>';
+
+				// Get all installed packages
+				const installedPackages = await ipcRenderer.invoke('getInstalledApps');
+
+				// Get disabled packages
+				const disabledPackages = await ipcRenderer.invoke('getDeviceDisabledApps');
+
+				// Create app objects
+				allApps = installedPackages.map(pkg => ({
+					name: pkg.split('.').pop() || pkg, // Use last part of package name
+					package: pkg,
+					disabled: disabledPackages.includes(pkg)
+				}));
+
+				// Sort alphabetically
+				allApps.sort((a, b) => a.package.localeCompare(b.package));
+
+				renderAppList(allApps);
+			} catch (error) {
+				console.error('Error loading apps:', error);
+				document.getElementById('appList').innerHTML = `
+					<p style="text-align: center; padding: 2rem; color: #ee2435;">
+						Error loading apps: ${error.message}<br>
+						Make sure a device is connected.
+					</p>
+				`;
+			}
+		}
+
+		function renderAppList(apps) {
+			const appList = document.getElementById('appList');
+			appList.innerHTML = '';
+
+			apps.forEach(app => {
+				const appItem = document.createElement('div');
+				appItem.className = 'app-item';
+
+				const statusClass = app.disabled ? 'status-disabled' : 'status-enabled';
+				const statusText = app.disabled ? 'Disabled' : 'Enabled';
+
+				appItem.innerHTML = `
+					<div class="app-info">
+						<div class="app-name">${app.name}</div>
+						<div class="app-package">${app.package}</div>
+					</div>
+					<span class="status-badge ${statusClass}">${statusText}</span>
+					<label class="toggle-switch">
+						<input type="checkbox" ${app.disabled ? 'checked' : ''} data-package="${app.package}">
+						<span class="slider"></span>
+					</label>
+				`;
+
+				appList.appendChild(appItem);
+
+				// Store initial state
+				appStates[app.package] = app.disabled;
+			});
+
+			// Add event listeners to toggles
+			document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+				toggle.addEventListener('change', function() {
+					const packageName = this.getAttribute('data-package');
+					const isDisabled = this.checked;
+					appStates[packageName] = isDisabled;
+
+					// Update badge
+					const appItem = this.closest('.app-item');
+					const badge = appItem.querySelector('.status-badge');
+					badge.className = `status-badge ${isDisabled ? 'status-disabled' : 'status-enabled'}`;
+					badge.textContent = isDisabled ? 'Disabled' : 'Enabled';
+				});
+			});
+		}
+
+		let currentFilter = 'all';
+
+		// Filter apps based on current filter and search
+		function filterAndRenderApps() {
+			const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+			let filteredApps = allApps.filter(app => {
+				const matchesSearch = app.name.toLowerCase().includes(searchTerm) ||
+									 app.package.toLowerCase().includes(searchTerm);
+
+				if (currentFilter === 'all') return matchesSearch;
+				if (currentFilter === 'enabled') return matchesSearch && !app.disabled;
+				if (currentFilter === 'disabled') return matchesSearch && app.disabled;
+
+				return matchesSearch;
+			});
+
+			renderAppList(filteredApps);
+		}
+
+		// Tab filtering
+		document.querySelectorAll('.filter-tab').forEach(tab => {
+			tab.addEventListener('click', function() {
+				document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+				this.classList.add('active');
+				currentFilter = this.getAttribute('data-filter');
+				filterAndRenderApps();
+			});
+		});
+
+		// Search functionality
+		document.getElementById('searchBox').addEventListener('input', function(e) {
+			filterAndRenderApps();
+		});
+
+		// Apply changes button
+		document.getElementById('applyChanges').addEventListener('click', async function() {
+			const disabledApps = Object.keys(appStates).filter(pkg => appStates[pkg]);
+			console.log('Apps to disable:', disabledApps);
+
+			// Here you would call your disable function
+			// await disablePackagesOnDevices(disabledApps);
+
+			alert(`Changes will be applied to devices.\nDisabling ${disabledApps.length} apps.`);
+		});
+
+		// Refresh list button
+		document.getElementById('refreshList').addEventListener('click', function() {
+			loadAppsFromDevice();
+		});
+
+		// Load templates
+		async function loadTemplates() {
+			try {
+				const data = await ipcRenderer.invoke('getTemplates');
+				templates = data.templates || [];
+				renderTemplates();
+			} catch (error) {
+				console.error('Error loading templates:', error);
+			}
+		}
+
+		// Render templates
+		function renderTemplates() {
+			const templateList = document.getElementById('templateList');
+			templateList.innerHTML = '';
+
+			if (templates.length === 0) {
+				templateList.innerHTML = '<p style="color: #011e41; font-size: 0.875rem;">No templates yet. Create one from your current selection!</p>';
+				return;
+			}
+
+			templates.forEach(template => {
+				const templateItem = document.createElement('div');
+				templateItem.className = 'template-item';
+
+				const templateName = document.createElement('span');
+				templateName.textContent = template.name;
+				if (template.isDefault) {
+					templateName.innerHTML += ' <span style="font-size: 0.75rem; opacity: 0.8;">(Default)</span>';
+				}
+				templateName.style.flex = '1';
+				templateItem.appendChild(templateName);
+
+				// Set as default button
+				if (!template.isDefault) {
+					const defaultBtn = document.createElement('button');
+					defaultBtn.className = 'template-delete-btn';
+					defaultBtn.innerHTML = '⭐';
+					defaultBtn.title = 'Set as default';
+					defaultBtn.addEventListener('click', async function(e) {
+						e.stopPropagation();
+						await setAsDefault(template);
+					});
+					templateItem.appendChild(defaultBtn);
+				}
+
+				// Edit button
+				const editBtn = document.createElement('button');
+				editBtn.className = 'template-delete-btn';
+				editBtn.innerHTML = '✎';
+				editBtn.title = 'Edit template';
+				editBtn.addEventListener('click', async function(e) {
+					e.stopPropagation();
+					editTemplate(template);
+				});
+				templateItem.appendChild(editBtn);
+
+				// Delete button
+				const deleteBtn = document.createElement('button');
+				deleteBtn.className = 'template-delete-btn';
+				deleteBtn.innerHTML = '✕';
+				deleteBtn.title = 'Delete template';
+				deleteBtn.addEventListener('click', async function(e) {
+					e.stopPropagation();
+					if (confirm(`Delete template "${template.name}"?`)) {
+						await deleteTemplate(template.id);
+					}
+				});
+				templateItem.appendChild(deleteBtn);
+
+				templateItem.title = template.description || 'No description';
+
+				templateItem.addEventListener('click', function() {
+					applyTemplate(template);
+					activeTemplate = template;
+					// Highlight active template
+					document.querySelectorAll('.template-item').forEach(t => t.classList.remove('active'));
+					this.classList.add('active');
+					// Show update button
+					document.getElementById('updateTemplate').style.display = 'inline-block';
+				});
+
+				templateList.appendChild(templateItem);
+			});
+		}
+
+		// Set template as default
+		async function setAsDefault(template) {
+			try {
+				const result = await ipcRenderer.invoke('setDefaultTemplate', template.id);
+				if (result.success) {
+					alert(`"${template.name}" is now the default template for quick disable!`);
+					await loadTemplates();
+				} else {
+					alert('Error setting default template: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error setting default template:', error);
+				alert('Error setting default template');
+			}
+		}
+
+		// Delete template
+		async function deleteTemplate(templateId) {
+			try {
+				const result = await ipcRenderer.invoke('deleteTemplate', templateId);
+				if (result.success) {
+					alert('Template deleted successfully!');
+					activeTemplate = null;
+					document.getElementById('updateTemplate').style.display = 'none';
+					await loadTemplates();
+				} else {
+					alert('Error deleting template: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error deleting template:', error);
+				alert('Error deleting template');
+			}
+		}
+
+		// Apply template
+		function applyTemplate(template) {
+			// Update appStates to match template
+			Object.keys(appStates).forEach(pkg => {
+				appStates[pkg] = template.apps.includes(pkg);
+			});
+
+			// Update UI toggles
+			document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+				const packageName = toggle.getAttribute('data-package');
+				toggle.checked = appStates[packageName] || false;
+
+				// Update badge if visible
+				const appItem = toggle.closest('.app-item');
+				const badge = appItem.querySelector('.status-badge');
+				if (badge) {
+					const isDisabled = toggle.checked;
+					badge.className = `status-badge ${isDisabled ? 'status-disabled' : 'status-enabled'}`;
+					badge.textContent = isDisabled ? 'Disabled' : 'Enabled';
+				}
+			});
+
+			alert(`Applied template: ${template.name}`);
+		}
+
+		// Save current selection as template (quick save)
+		document.getElementById('saveAsTemplate').addEventListener('click', async function() {
+			const disabledApps = Object.keys(appStates).filter(pkg => appStates[pkg]);
+
+			if (disabledApps.length === 0) {
+				alert('No apps selected to disable. Please select at least one app.');
+				return;
+			}
+
+			// Open modal with current selection pre-filled
+			openTemplateBuilder(disabledApps);
+		});
+
+		// Update existing template
+		document.getElementById('updateTemplate').addEventListener('click', async function() {
+			if (!activeTemplate) {
+				alert('No template selected');
+				return;
+			}
+
+			if (!confirm(`Update template "${activeTemplate.name}" with current selection?`)) {
+				return;
+			}
+
+			const disabledApps = Object.keys(appStates).filter(pkg => appStates[pkg]);
+
+			const updatedTemplate = {
+				...activeTemplate,
+				apps: disabledApps
+			};
+
+			try {
+				const result = await ipcRenderer.invoke('saveTemplate', updatedTemplate);
+				if (result.success) {
+					alert('Template updated successfully!');
+					await loadTemplates();
+				} else {
+					alert('Error updating template: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error updating template:', error);
+				alert('Error updating template');
+			}
+		});
+
+		// Template Builder Modal Functions
+		let selectedAppsForTemplate = [];
+		let editingTemplate = null;
+
+		function openTemplateBuilder(preSelectedApps = [], template = null) {
+			selectedAppsForTemplate = [...preSelectedApps];
+			editingTemplate = template;
+
+			if (template) {
+				// Editing mode
+				document.getElementById('customTemplateName').value = template.name;
+				document.getElementById('customTemplateDesc').value = template.description || '';
+				document.querySelector('.template-builder-header h2').textContent = 'Edit Template';
+				document.getElementById('saveCustomTemplate').textContent = 'Update Template';
+			} else {
+				// Creating mode
+				document.getElementById('customTemplateName').value = '';
+				document.getElementById('customTemplateDesc').value = '';
+				document.querySelector('.template-builder-header h2').textContent = 'Create Custom Template';
+				document.getElementById('saveCustomTemplate').textContent = 'Save Template';
+			}
+
+			renderAppSelector();
+			document.getElementById('templateBuilderModal').style.display = 'block';
+		}
+
+		// Edit template function
+		function editTemplate(template) {
+			openTemplateBuilder(template.apps || [], template);
+		}
+
+		function closeTemplateBuilder() {
+			document.getElementById('templateBuilderModal').style.display = 'none';
+			selectedAppsForTemplate = [];
+			editingTemplate = null;
+		}
+
+		function renderAppSelector() {
+			const container = document.getElementById('appSelectorContainer');
+			container.innerHTML = '';
+
+			const searchTerm = document.getElementById('modalSearchBox').value.toLowerCase();
+
+			const filteredApps = allApps.filter(app =>
+				app.name.toLowerCase().includes(searchTerm) ||
+				app.package.toLowerCase().includes(searchTerm)
+			);
+
+			filteredApps.forEach(app => {
+				const item = document.createElement('div');
+				item.className = 'app-selector-item';
+
+				const checkbox = document.createElement('input');
+				checkbox.type = 'checkbox';
+				checkbox.checked = selectedAppsForTemplate.includes(app.package);
+				checkbox.addEventListener('change', function() {
+					if (this.checked) {
+						if (!selectedAppsForTemplate.includes(app.package)) {
+							selectedAppsForTemplate.push(app.package);
+						}
+					} else {
+						selectedAppsForTemplate = selectedAppsForTemplate.filter(pkg => pkg !== app.package);
+					}
+				});
+
+				const info = document.createElement('div');
+				info.className = 'app-selector-info';
+				info.innerHTML = `
+					<div class="app-name">${app.name}</div>
+					<div class="app-package">${app.package}</div>
+				`;
+
+				item.appendChild(checkbox);
+				item.appendChild(info);
+				item.addEventListener('click', function(e) {
+					if (e.target !== checkbox) {
+						checkbox.click();
+					}
+				});
+
+				container.appendChild(item);
+			});
+		}
+
+		// Open template builder (custom)
+		document.getElementById('createCustomTemplate').addEventListener('click', function() {
+			openTemplateBuilder();
+		});
+
+		// Close modal buttons
+		document.getElementById('closeTemplateBuilder').addEventListener('click', closeTemplateBuilder);
+		document.getElementById('cancelTemplateBuilder').addEventListener('click', closeTemplateBuilder);
+
+		// Close modal on outside click
+		document.getElementById('templateBuilderModal').addEventListener('click', function(e) {
+			if (e.target === this) {
+				closeTemplateBuilder();
+			}
+		});
+
+		// Search in modal
+		document.getElementById('modalSearchBox').addEventListener('input', renderAppSelector);
+
+		// Select/Deselect all
+		document.getElementById('selectAllApps').addEventListener('click', function() {
+			selectedAppsForTemplate = allApps.map(app => app.package);
+			renderAppSelector();
+		});
+
+		document.getElementById('deselectAllApps').addEventListener('click', function() {
+			selectedAppsForTemplate = [];
+			renderAppSelector();
+		});
+
+		// Save custom template
+		document.getElementById('saveCustomTemplate').addEventListener('click', async function() {
+			const templateName = document.getElementById('customTemplateName').value.trim();
+			const templateDesc = document.getElementById('customTemplateDesc').value.trim();
+
+			if (!templateName) {
+				alert('Please enter a template name');
+				return;
+			}
+
+			if (selectedAppsForTemplate.length === 0) {
+				alert('Please select at least one app');
+				return;
+			}
+
+			const templateData = {
+				name: templateName,
+				description: templateDesc,
+				apps: selectedAppsForTemplate
+			};
+
+			// If editing, preserve the ID
+			if (editingTemplate) {
+				templateData.id = editingTemplate.id;
+			}
+
+			try {
+				const result = await ipcRenderer.invoke('saveTemplate', templateData);
+				if (result.success) {
+					alert(editingTemplate ? 'Template updated successfully!' : 'Template saved successfully!');
+					closeTemplateBuilder();
+					await loadTemplates();
+				} else {
+					alert('Error saving template: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error saving template:', error);
+				alert('Error saving template');
+			}
+		});
+
+		// Import template from CSV
+		document.getElementById('importFromCsv').addEventListener('click', async function() {
+			try {
+				// Open file dialog
+				const csvFilePath = await ipcRenderer.invoke('selectCsvFile');
+				if (!csvFilePath) return; // User cancelled
+
+				// Import the CSV
+				const result = await ipcRenderer.invoke('importTemplateFromCsv', csvFilePath);
+
+				if (result.success) {
+					// Open the template builder with imported data
+					openTemplateBuilder(result.template.apps, null);
+					document.getElementById('customTemplateName').value = result.template.name;
+					document.getElementById('customTemplateDesc').value = result.template.description;
+					alert('CSV imported successfully! Review and save the template.');
+				} else {
+					alert('Error importing CSV: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error importing CSV:', error);
+				alert('Error importing CSV: ' + error.message);
+			}
+		});
+
+		// Export template to CSV
+		document.getElementById('exportToCsv').addEventListener('click', async function() {
+			if (!activeTemplate) {
+				alert('Please select a template first');
+				return;
+			}
+
+			try {
+				// Generate default filename
+				const defaultName = activeTemplate.name.toLowerCase().replace(/\s+/g, '_') + '.csv';
+
+				// Open save dialog
+				const csvFilePath = await ipcRenderer.invoke('saveCsvFile', defaultName);
+				if (!csvFilePath) return; // User cancelled
+
+				// Export the template
+				const result = await ipcRenderer.invoke('exportTemplateToCsv', activeTemplate, csvFilePath);
+
+				if (result.success) {
+					alert('Template exported successfully to:\n' + csvFilePath);
+				} else {
+					alert('Error exporting template: ' + result.error);
+				}
+			} catch (error) {
+				console.error('Error exporting template:', error);
+				alert('Error exporting template: ' + error.message);
+			}
+		});
+
+		// Initial load
+		loadAppsFromDevice();
+		loadTemplates();
+	</script>
+
+	<script>if (window.module) module = window.module;</script>
+</body>
+
+</html>

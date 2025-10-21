@@ -47,7 +47,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile("index.html");
+  mainWindow.loadFile("screens/index.html");
 
   // Open DevTools for debugging
   mainWindow.webContents.openDevTools();
@@ -144,6 +144,156 @@ app.whenReady().then(() => {
     });
     return result.filePaths;
   });
+
+  // Get all templates
+  ipcMain.handle('getTemplates', async () => {
+    try {
+      const templatesPath = path.join(__dirname, 'models', 'templates.json');
+      const templatesData = fs.readFileSync(templatesPath, 'utf-8');
+      return JSON.parse(templatesData);
+    } catch (error) {
+      console.error('Error reading templates:', error);
+      return { templates: [] };
+    }
+  });
+
+  // Save new template
+  ipcMain.handle('saveTemplate', async (event, template) => {
+    try {
+      const templatesPath = path.join(__dirname, 'models', 'templates.json');
+      const templatesData = JSON.parse(fs.readFileSync(templatesPath, 'utf-8'));
+
+      // Generate ID if not provided
+      if (!template.id) {
+        template.id = template.name.toLowerCase().replace(/\s+/g, '-');
+      }
+
+      // Check if template exists
+      const existingIndex = templatesData.templates.findIndex(t => t.id === template.id);
+
+      if (existingIndex >= 0) {
+        templatesData.templates[existingIndex] = template;
+      } else {
+        templatesData.templates.push(template);
+      }
+
+      fs.writeFileSync(templatesPath, JSON.stringify(templatesData, null, 2), 'utf-8');
+      return { success: true, templates: templatesData.templates };
+    } catch (error) {
+      console.error('Error saving template:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Delete template
+  ipcMain.handle('deleteTemplate', async (event, templateId) => {
+    try {
+      const templatesPath = path.join(__dirname, 'models', 'templates.json');
+      const templatesData = JSON.parse(fs.readFileSync(templatesPath, 'utf-8'));
+
+      templatesData.templates = templatesData.templates.filter(t => t.id !== templateId);
+
+      fs.writeFileSync(templatesPath, JSON.stringify(templatesData, null, 2), 'utf-8');
+      return { success: true, templates: templatesData.templates };
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Set default template
+  ipcMain.handle('setDefaultTemplate', async (event, templateId) => {
+    try {
+      const templatesPath = path.join(__dirname, 'models', 'templates.json');
+      const templatesData = JSON.parse(fs.readFileSync(templatesPath, 'utf-8'));
+
+      // Remove isDefault from all templates
+      templatesData.templates.forEach(t => {
+        t.isDefault = false;
+      });
+
+      // Set the selected template as default
+      const template = templatesData.templates.find(t => t.id === templateId);
+      if (template) {
+        template.isDefault = true;
+      }
+
+      fs.writeFileSync(templatesPath, JSON.stringify(templatesData, null, 2), 'utf-8');
+      return { success: true, templates: templatesData.templates };
+    } catch (error) {
+      console.error('Error setting default template:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Import template from CSV
+  ipcMain.handle('importTemplateFromCsv', async (event, csvFilePath) => {
+    return new Promise((resolve, reject) => {
+      const packages = [];
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on('data', (row) => {
+          // Check if the action is "disable"
+          if (row.Action && row.Action.toLowerCase() === 'disable' && row['Package Name']) {
+            packages.push(row['Package Name'].trim());
+          }
+        })
+        .on('end', () => {
+          // Create template name from file name
+          const fileName = path.basename(csvFilePath, '.csv');
+          const templateName = fileName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+          resolve({
+            success: true,
+            template: {
+              name: templateName,
+              description: `Imported from ${path.basename(csvFilePath)}`,
+              apps: packages
+            }
+          });
+        })
+        .on('error', (error) => {
+          reject({ success: false, error: error.message });
+        });
+    });
+  });
+
+  // Export template to CSV
+  ipcMain.handle('exportTemplateToCsv', async (event, template, csvFilePath) => {
+    try {
+      // Create CSV content
+      let csvContent = 'Action,Package Name\n';
+      template.apps.forEach(packageName => {
+        csvContent += `disable,${packageName}\n`;
+      });
+
+      // Write to file
+      fs.writeFileSync(csvFilePath, csvContent, 'utf-8');
+
+      return { success: true, message: `Template exported to ${csvFilePath}` };
+    } catch (error) {
+      console.error('Error exporting template to CSV:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  // Select CSV file dialog
+  ipcMain.handle('selectCsvFile', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+    });
+    return result.canceled ? null : result.filePaths[0];
+  });
+
+  // Save CSV file dialog
+  ipcMain.handle('saveCsvFile', async (event, defaultName) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: defaultName || 'template.csv',
+      filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+    });
+    return result.canceled ? null : result.filePath;
+  });
 });
 
 function readPackagesFromCsv(filePath) {
@@ -169,18 +319,136 @@ function readPackagesFromCsv(filePath) {
 // Listen for 'getDisabledApps' event from renderer process
 ipcMain.handle('getDisabledApps', async () => {
   try {
-      // Update with your actual CSV file path
-      const csvFilePath = path.join(__dirname, 'src','csv','sup_disable.csv');
-      const packages = await readPackagesFromCsv(csvFilePath);
-      console.log('Packages:', packages)
-      return packages;
+      // Load from default template
+      const templatesPath = path.join(__dirname, 'models', 'templates.json');
+
+      if (!fs.existsSync(templatesPath)) {
+        console.log('No templates file found, returning empty array');
+        return [];
+      }
+
+      const templatesData = JSON.parse(fs.readFileSync(templatesPath, 'utf-8'));
+
+      // Find the default template - look for isDefault flag first
+      let defaultTemplate = templatesData.templates.find(t => t.isDefault === true);
+
+      // Fallback: look for 'default' or 'sup-disable' ID, or use first template
+      if (!defaultTemplate) {
+        defaultTemplate = templatesData.templates.find(t => t.id === 'default');
+      }
+
+      if (!defaultTemplate) {
+        defaultTemplate = templatesData.templates.find(t => t.id === 'sup-disable');
+      }
+
+      if (!defaultTemplate && templatesData.templates.length > 0) {
+        defaultTemplate = templatesData.templates[0];
+      }
+
+      if (!defaultTemplate) {
+        console.log('No templates found, returning empty array');
+        return [];
+      }
+
+      console.log(`Using template "${defaultTemplate.name}" with ${defaultTemplate.apps.length} apps`);
+      return defaultTemplate.apps;
   } catch (error) {
-      console.error('Error reading packages from CSV:', error);
+      console.error('Error reading packages from default template:', error);
       throw error;
   }
 });
 
+// Get installed apps from device
+ipcMain.handle('getInstalledApps', async (event, serial) => {
+  const adbkit = require('adbkit');
+  const client = adbkit.createClient();
 
+  try {
+    let devices = await client.listDevices();
+
+    if (devices.length === 0) {
+      throw new Error('No devices connected');
+    }
+
+    // Use first device if no serial specified
+    const deviceSerial = serial || devices[0].id;
+
+    // Get packages using shell command
+    return new Promise((resolve, reject) => {
+      client.shell(deviceSerial, 'pm list packages', (err, output) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let result = '';
+        output.on('data', (data) => {
+          result += data.toString();
+        });
+
+        output.on('end', () => {
+          // Parse package list
+          const packages = result
+            .split('\n')
+            .filter(line => line.startsWith('package:'))
+            .map(line => line.replace('package:', '').trim())
+            .filter(pkg => pkg.length > 0);
+
+          resolve(packages);
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error getting installed apps:', error);
+    throw error;
+  }
+});
+
+// Get disabled apps from device
+ipcMain.handle('getDeviceDisabledApps', async (event, serial) => {
+  const adbkit = require('adbkit');
+  const client = adbkit.createClient();
+
+  try {
+    let devices = await client.listDevices();
+
+    if (devices.length === 0) {
+      throw new Error('No devices connected');
+    }
+
+    // Use first device if no serial specified
+    const deviceSerial = serial || devices[0].id;
+
+    // Get disabled packages using shell command
+    return new Promise((resolve, reject) => {
+      client.shell(deviceSerial, 'pm list packages -d', (err, output) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        let result = '';
+        output.on('data', (data) => {
+          result += data.toString();
+        });
+
+        output.on('end', () => {
+          // Parse disabled package list
+          const packages = result
+            .split('\n')
+            .filter(line => line.startsWith('package:'))
+            .map(line => line.replace('package:', '').trim())
+            .filter(pkg => pkg.length > 0);
+
+          resolve(packages);
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Error getting disabled apps:', error);
+    throw error;
+  }
+});
 
 function addCountryCode(phoneNumber,countryCode) {
   return phoneNumber.startsWith(countryCode) ? phoneNumber : `${countryCode}${phoneNumber}`;

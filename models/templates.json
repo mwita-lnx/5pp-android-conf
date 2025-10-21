@@ -1,0 +1,27 @@
+{
+  "templates": [
+    {
+      "name": "Sup Disable",
+      "description": "Imported from sup_disable.csv",
+      "apps": [
+        "com.android.chrome",
+        "com.android.vending",
+        "com.google.android.apps.docs",
+        "com.google.android.apps.maps",
+        "com.google.android.apps.messaging",
+        "com.google.android.apps.photos",
+        "com.google.android.apps.restore",
+        "com.google.android.apps.youtube.music",
+        "com.google.android.gm",
+        "com.google.android.googlequicksearchbox",
+        "com.google.android.projection.gearhead",
+        "com.google.android.tts",
+        "com.google.android.youtube",
+        "com.android.providers.calendar",
+        "com.google.android.calendar"
+      ],
+      "id": "sup-disable",
+      "isDefault": true
+    }
+  ]
+}

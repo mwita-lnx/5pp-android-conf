@@ -12,22 +12,33 @@ const client = adb.createClient({ bin: adbpath });
 
 let jsonObject = {};
 
-// Open the modal
-document.getElementById('openJsonDisable').addEventListener('click', function() {
-  document.getElementById('jsonModal').style.display = 'block';
-});
+// These elements only exist on manage-apps.html, check before adding listeners
+const openJsonDisable = document.getElementById('openJsonDisable');
+const jsonModal = document.getElementById('jsonModal');
+const closeModalBtn = document.getElementById('closeModalBtn');
 
-// Close the modal when the close button is clicked
-document.getElementById('closeModalBtn').addEventListener('click', function() {
-  document.getElementById('jsonModal').style.display = 'none';
-});
+if (openJsonDisable && jsonModal) {
+  // Open the modal
+  openJsonDisable.addEventListener('click', function() {
+    jsonModal.style.display = 'block';
+  });
+}
+
+if (closeModalBtn && jsonModal) {
+  // Close the modal when the close button is clicked
+  closeModalBtn.addEventListener('click', function() {
+    jsonModal.style.display = 'none';
+  });
+}
 
 // Close the modal if the user clicks outside of it
-window.onclick = function(event) {
-  if (event.target == document.getElementById('jsonModal')) {
-    document.getElementById('jsonModal').style.display = 'none';
-  }
-};
+if (jsonModal) {
+  window.onclick = function(event) {
+    if (event.target == jsonModal) {
+      jsonModal.style.display = 'none';
+    }
+  };
+}
 
 // Add a key-value pair to the JSON object
 function addKeyValue() {
