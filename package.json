@@ -25,10 +25,12 @@
       "main.js",
       "resources/**/*",
       "src/**/*",
-      "index.html",
+      "screens/**/*",
+      "models/**/*",
       "package.json",
       "renderer.js",
       "preload.js",
+      "script.js",
       "adb.bat",
       "style.css"
     ]
