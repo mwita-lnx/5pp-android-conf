@@ -492,9 +492,21 @@ ipcMain.handle('select-vcf', async () => {
 });
 
 ipcMain.handle('get-contact-vcfs', async () => {
-  const vcfDirectory = path.join(__dirname, 'src', 'vcf');
-  const vcfFiles = fs.readdirSync(vcfDirectory);
-  return vcfFiles;
+  try {
+    const vcfDirectory = path.join(__dirname, 'src', 'vcf');
+
+    // Check if directory exists, if not create it
+    if (!fs.existsSync(vcfDirectory)) {
+      fs.mkdirSync(vcfDirectory, { recursive: true });
+      return []; // Return empty array for new directory
+    }
+
+    const vcfFiles = fs.readdirSync(vcfDirectory);
+    return vcfFiles;
+  } catch (error) {
+    console.error('Error reading VCF files:', error);
+    return []; // Return empty array on error instead of throwing
+  }
 });
 
 ipcMain.handle('save-vcf', async () => {
