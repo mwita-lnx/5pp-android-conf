@@ -1,0 +1,15 @@
+{
+  "echis": {
+    "path": [
+      "src/apks/base.apk",
+      "src/apks/split_config.xxhdpi.apk"
+    ],
+    "checked": true
+  },
+  "whatsapp": {
+    "path": [
+      "src/apks/WhatsApp Messenger_2.24.9.20_Apkpure.apk"
+    ],
+    "checked": true
+  }
+}

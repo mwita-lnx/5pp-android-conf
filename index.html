@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>5PP</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+	<link rel="stylesheet" href="style.css">
+
+
+</head>
+
+<body>
+	<!-- partial:index.partial.html -->
+	<div class="app">
+
+		<div class="app-body">
+			<div class="app-body-navigation">
+				<nav class="navigation">
+					<a href="#">
+						<i class="ph-browsers"></i>
+						<span>Dashboard</span>
+					</a>
+					<a href="#">
+						<i class="ph-check-square"></i>
+						<span>Scheduled</span>
+					</a>
+					<a href="#" id="openModalBtn">
+						<i class="ph-swap"></i>
+						<span>Add Apks</span>
+					</a>
+					<a href="#" id="openContactsBtn">
+						<i class="ph-file-text"></i>
+						<span>Create Contacts</span>
+					</a>
+					<a href="#" id="openJsonDisable">
+						<i class="ph-globe" ></i>
+						<span>Manage Disable</span>
+					</a>
+					<a href="#">
+						<i class="ph-clipboard-text"></i>
+						<span>Add Adb To path</span>
+					</a>
+				</nav>
+
+			</div>
+			<div class="app-body-main-content">
+				<section class="service-section">
+					<div class="mobile">
+						<button id="setupbtn" class="flat-button">
+							Setup
+						</button>
+					</div>
+					<div class="tiles">
+						<!-- APK Installation Tiles -->
+						<article class="tile" id="apk-tiles">
+							<div class="tile-header">
+								<i class="ph-apps-light"></i>
+								<h3>
+									<span>Install APKs</span>
+									<span>Manage APK installations</span>
+								</h3>
+							</div>
+
+							<a href="#" id="installApks">
+								<span>install APKs</span>
+								<span class="icon-button">
+									<i class="ph-caret-right-bold"></i>
+								</span>
+							</a>
+
+						</article>
+
+						<!-- App Disabling Tiles -->
+						<article class="tile" id="app-tiles">
+							<div class="tile-header">
+								<i class="ph-apps-light"></i>
+								<h3>
+									<span>Disable Apps</span>
+									<span>Manage app disabling</span>
+								</h3>
+							</div>
+							<a href="#" id="disableApps">
+								<span>Disable Apps</span>
+								<span class="icon-button">
+									<i class="ph-caret-right-bold"></i>
+								</span>
+							</a>
+
+						</article>
+
+						<!-- Push Contacts Tiles -->
+						<article class="tile" id="contact-tiles">
+							<div class="tile-header">
+								<i class="ph-user-light"></i>
+								<h3>
+									<span>Push Contacts</span>
+									<span>Manage contact pushing</span>
+								</h3>
+							</div>
+							<div>
+							<a href="#" id="uploadcontactsbtn">
+								
+								<span>Push Contacts</span>
+								<span class="icon-button">
+									<i class="ph-caret-right-bold"></i>
+								</span>
+							</a>
+						</div>
+					</div>
+
+				</section>
+				<section class="transfer-section">
+					<div class="window">
+						<div class="bar">
+							<div class="btn"></div>
+						</div>
+						<div id="terminal" class="body">
+							<pre
+								id="terminal-body"><div class="comment command"># Process Logs:</div><div class="prompt">$ <span class="pulse">_</span></div></pre>
+						</div>
+					</div>
+				</section>
+
+
+				</section>
+
+			</div>
+
+			<div class="app-body-sidebar">
+				<section class="device-section">
+					<h2>Devices</h2>
+					<div class="devices" id="device-list">
+						<!-- Devices will be dynamically injected here -->
+					</div>
+				</section>
+
+
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<div id="modal" class="modal" style="display:none;">
+		<div class="modal-content">
+			<h2>Manage APKs</h2>
+			<div id="checkbox-group" class="checkbox-group"></div> <!-- This will display the APK list -->
+			<input type="text" id="apkNameInput" placeholder="Enter APK name" /> <!-- Input for APK name -->
+			<button id="saveChangesBtn">Save Changes</button>
+			<button id="closeModalBtn">Close</button>
+		</div>
+	</div>
+	
+
+	<div id="modalcontacts" class="modal" style="display:none;">
+		<div class="modal-content">
+	
+			<h1 style="color: #ffffff;">VCF Converter</h1>
+			<div id="checkbox-vcf" class="checkbox-group"></div>
+			<input type="text" id="countryCode" placeholder="Enter the country code" />
+			<button id="selectCSV">Select CSV File</button>
+			<button id="convertToVCF">Convert to VCF</button>
+			<p id="status"></p>
+		</div>
+	</div>
+
+	<div id="jsonModal" class="dark-theme-modal">
+		<div class="dark-theme-modal-content">
+		  <span class="dark-theme-close" id="closeModalBtn">&times;</span>
+		  <h2 class="dark-theme-heading">Edit JSON</h2>
+		  <div class="dark-theme-form-group">
+			<label for="key">Key:</label>
+			<input type="text" id="key" class="dark-theme-input" placeholder="Enter key">
+		  </div>
+		  <div class="dark-theme-form-group">
+			<label for="value">Value:</label>
+			<input type="text" id="value" class="dark-theme-input" placeholder="Enter value">
+		  </div>
+		  <button onclick="addKeyValue()" class="dark-theme-button">Add Key-Value</button>
+		  <button onclick="clearJson()" class="dark-theme-button">Clear JSON</button>
+		</div>
+
+	<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+	<script src="src/libs/jquery-3.6.0.min.js"></script>
+
+	<script src='https://unpkg.com/phosphor-icons'></script>
+	<script src="script.js"></script>
+	<script src="renderer.js"></script>
+	<script src="src/libs/checklist.js"></script>
+	<script src="src/libs/installApks.js"></script>
+	<script src="src/libs/disableApps.js"></script>
+	<script src="src/libs/contacts.js"></script>
+
+<script>if (window.module) module = window.module;</script>
+
+</body>
+
+</html>

@@ -1,0 +1,36 @@
+{
+  "name": "5pp-app",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --no-sandbox",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "adbkit": "^2.11.1",
+    "csv-parser": "^3.0.0"
+  },
+  "devDependencies": {
+    "electron": "^32.0.2"
+  },
+  "build": {
+    "asar": false,
+    "appId": "com.5pp.id",
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "platform-tools/**/*",
+      "main.js",
+      "resources/**/*",
+      "src/**/*",
+      "index.html",
+      "package.json",
+      "renderer.js",
+      "preload.js",
+      "adb.bat",
+      "style.css"
+    ]
+  }
+}
